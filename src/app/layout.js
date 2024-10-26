@@ -1,42 +1,24 @@
 import "./globals.css";
-import { SidebarProvider } from "../components/ui/sidebar";
-import { SidebarComponent } from "../components/Sidebar";
-import { DynamicBreadcrumbs } from "../components/DynamicBreadcrums";
-import { Separator } from "../components/ui/separator";
-import { SidebarTrigger, SidebarInset } from "../components/ui/sidebar";
-import {
-  sidebarData
-} from "./rolesData";
+import { Inter } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "../auth";
+import { Toaster } from "react-hot-toast";
+const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: "DigiSkools",
-  description: "DigiSkools",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }) {
-  const roleData = sidebarData;
-
+  const session = await auth();
   return (
-    <html lang="en">
-      <body>
-        <SidebarProvider>
-          <SidebarComponent data={roleData} />
-          <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-              <div className="flex items-center gap-2 px-4">
-                <SidebarTrigger className="-ml-1" />
-                <Separator orientation="vertical" className="mr-2 h-4" />
-                <DynamicBreadcrumbs />
-              </div>
-            </header>
-            <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-              {children}
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
-      </body>
-    </html>
+    <SessionProvider
+      refetchInterval={5 * 60}// 5 minutes
+      session={session}>
+      <html lang="en">
+        <body className={inter.className}>
+          <Toaster />
+          {children}
+        </body>
+      </html>
+    </SessionProvider>
   );
 }
